@@ -1,7 +1,7 @@
 package com.github.itbookapp.data.datasource
 
 import com.github.itbookapp.data.api.BookApi
-import com.github.itbookapp.data.ext.verify
+import com.github.itbookapp.ext.verify
 import com.github.itbookapp.data.model.Books
 import com.github.itbookapp.data.model.NewBookList
 import com.github.itbookapp.data.model.SearchData

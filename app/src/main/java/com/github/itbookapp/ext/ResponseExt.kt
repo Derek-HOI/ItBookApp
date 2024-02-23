@@ -1,4 +1,4 @@
-package com.github.itbookapp.data.ext
+package com.github.itbookapp.ext
 
 import com.github.itbookapp.data.model.exception.CustomException
 import retrofit2.Response

@@ -1,4 +1,4 @@
-package com.github.itbookapp.data.ext
+package com.github.itbookapp.ext
 
 import android.util.Log
 import com.github.itbookapp.data.model.RequestResult

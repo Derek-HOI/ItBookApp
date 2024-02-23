@@ -1,7 +1,7 @@
 package com.github.itbookapp.domain.repository
 
 import com.github.itbookapp.data.datasource.BookDataSource
-import com.github.itbookapp.data.ext.asFlowResponse
+import com.github.itbookapp.ext.asFlowResponse
 import com.github.itbookapp.data.model.Books
 import com.github.itbookapp.data.model.NewBookList
 import com.github.itbookapp.data.model.RequestResult
