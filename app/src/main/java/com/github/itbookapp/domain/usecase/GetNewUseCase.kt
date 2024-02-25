@@ -13,11 +13,10 @@ import javax.inject.Inject
 class GetNewUseCase
 @Inject
 constructor(
-    private val repository: BookRepository,
-    @IoDispatcher dispatcher: CoroutineDispatcher
-) : FlowUseCase<Any?, NewBookList>(dispatcher) {
+    private val repository: BookRepository
+) : BaseUseCase<Any?, NewBookList>() {
 
-    override suspend fun execute(p: Any?): Flow<RequestResult<NewBookList>> =
+    override suspend fun execute(p: Any?): RequestResult<NewBookList> =
         repository.getNew()
 
 }

@@ -9,7 +9,7 @@ import retrofit2.http.Path
 
 interface BookApi {
 
-    @GET("/search/{query}/{page}")
+    @GET("/1.0/search/{query}/{page}")
     suspend fun search(
         @Path("query")
         query: String,
@@ -17,10 +17,10 @@ interface BookApi {
         page: Int
     ): Response<SearchData>
 
-    @GET("/new")
+    @GET("/1.0/new")
     suspend fun getNew(): Response<NewBookList>
 
-    @GET("/books/{isbn13}")
+    @GET("/1.0/books/{isbn13}")
     suspend fun getBooks(
         @Path("isbn13")
         isbn13: String

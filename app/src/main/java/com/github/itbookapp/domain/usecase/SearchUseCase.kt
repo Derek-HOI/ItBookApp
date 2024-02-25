@@ -13,11 +13,10 @@ import javax.inject.Inject
 class SearchUseCase
 @Inject
 constructor(
-    private val repository: BookRepository,
-    @IoDispatcher dispatcher: CoroutineDispatcher
-) : FlowUseCase<SearchUseCase.Params, SearchData>(dispatcher) {
+    private val repository: BookRepository
+) : BaseUseCase<SearchUseCase.Params, SearchData>() {
 
-    override suspend fun execute(p: Params): Flow<RequestResult<SearchData>> =
+    override suspend fun execute(p: Params): RequestResult<SearchData> =
         repository.search(p.query, p.page)
 
     data class Params(

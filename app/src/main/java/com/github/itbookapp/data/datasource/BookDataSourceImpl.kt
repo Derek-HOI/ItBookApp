@@ -1,10 +1,10 @@
 package com.github.itbookapp.data.datasource
 
 import com.github.itbookapp.data.api.BookApi
-import com.github.itbookapp.ext.verify
 import com.github.itbookapp.data.model.Books
 import com.github.itbookapp.data.model.NewBookList
 import com.github.itbookapp.data.model.SearchData
+import com.github.itbookapp.ext.verify
 import javax.inject.Inject
 
 class BookDataSourceImpl
@@ -14,7 +14,7 @@ constructor(
 ) : BookDataSource {
 
     override suspend fun search(query: String, page: Int): SearchData {
-        return api.search(query, page).verify()
+        return if (query.isBlank()) SearchData(listOf(), 0, 0) else api.search(query, page).verify()
     }
 
     override suspend fun getNew(): NewBookList {

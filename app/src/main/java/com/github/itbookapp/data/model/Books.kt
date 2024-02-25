@@ -19,7 +19,7 @@ data class Books(
     val pages: String?,
     @SerializedName("pdf")
     val pdf: Map<String, String>?,
-    @SerializedName("pdf")
+    @SerializedName("price")
     val price: String?,
     @SerializedName("publisher")
     val publisher: String?,

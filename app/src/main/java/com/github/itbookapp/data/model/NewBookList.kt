@@ -6,5 +6,5 @@ data class NewBookList(
     @SerializedName("books")
     val books: List<Books>,
     @SerializedName("total")
-    val total: Int
+    val total: String
 )

@@ -12,6 +12,6 @@ import dagger.hilt.components.SingletonComponent
 abstract class DataSourceModule {
 
     @Binds
-    abstract fun bindBookDataSource(bookImpl: BookDataSourceImpl): BookDataSource
+    abstract fun bindBookDataSource(bookDataSourceImpl: BookDataSourceImpl): BookDataSource
 
 }

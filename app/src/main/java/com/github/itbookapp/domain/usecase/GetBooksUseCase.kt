@@ -14,10 +14,9 @@ class GetBooksUseCase
 @Inject
 constructor(
     private val repository: BookRepository,
-    @IoDispatcher dispatcher: CoroutineDispatcher
-) : FlowUseCase<GetBooksUseCase.Params, Books>(dispatcher) {
+) : BaseUseCase<GetBooksUseCase.Params, Books>() {
 
-    override suspend fun execute(p: Params): Flow<RequestResult<Books>> =
+    override suspend fun execute(p: Params): RequestResult<Books> =
         repository.getBooks(p.isbn13)
 
     data class Params(
