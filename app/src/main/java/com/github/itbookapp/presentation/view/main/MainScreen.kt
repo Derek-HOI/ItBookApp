@@ -23,6 +23,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -152,25 +153,24 @@ fun MainScreen(
         }
     }
 
-    val lifecycleOwner = LocalLifecycleOwner.current
+    val bookCollect by bookViewModel.eventFlow.collectAsState(initial = RequestResult.Loading)
 
-    LaunchedEffect(key1 = Unit, block = {
-        bookViewModel.eventFlow.collectLatest {
-            when (it) {
-                is BookViewModel.BookEvent.GetBooks -> {
-                    // do nothing here
-                }
-                is BookViewModel.BookEvent.GetNew -> {
-                    isRefreshing = it.result == RequestResult.Loading
-                    it.result.onSuccess { response ->
-                        newList.addAll(response.books)
-                    }
+    LaunchedEffect(key1 = bookCollect, block = {
+        when (bookCollect) {
+            is BookViewModel.BookEvent.GetBooks -> {
+                // do nothing here
+            }
+            is BookViewModel.BookEvent.GetNew -> {
+                val event = (bookCollect as BookViewModel.BookEvent.GetNew)
+                isRefreshing = event.result == RequestResult.Loading
+                event.result.onSuccess { response ->
+                    newList.addAll(response.books)
                 }
             }
         }
     })
 
-    lifecycleOwner.SetEvents(listener = { event ->
+    LocalLifecycleOwner.current.SetEvents(listener = { event ->
         if (event == Lifecycle.Event.ON_START) {
             bookViewModel.getNew()
         }

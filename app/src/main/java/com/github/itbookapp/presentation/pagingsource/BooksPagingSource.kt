@@ -36,7 +36,10 @@ class BooksPagingSource(
             val nextPage = if (totalCount > 0 && currentPage * pagingCount > totalCount) {
                 null
             } else {
-                currentPage.plus(1)
+                if (totalCount == 0)
+                    null
+                else
+                    currentPage.plus(1)
             }
 
             LoadResult.Page(
