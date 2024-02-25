@@ -9,8 +9,7 @@ import com.github.itbookapp.domain.usecase.SearchUseCase
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
-class BooksPagingSource
-constructor(
+class BooksPagingSource(
     private val query: String,
     private val dispatcher: CoroutineDispatcher,
     private val searchUseCase: SearchUseCase
@@ -51,9 +50,9 @@ constructor(
     }
 
     override fun getRefreshKey(state: PagingState<Int, Books>): Int? {
-        return state.anchorPosition?.let { achorPosition ->
-            state.closestPageToPosition(achorPosition)?.prevKey?.plus(1)
-                ?: state.closestPageToPosition(achorPosition)?.nextKey?.minus(1)
+        return state.anchorPosition?.let { anchorPosition ->
+            state.closestPageToPosition(anchorPosition)?.prevKey?.plus(1)
+                ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minus(1)
         }
     }
 }

@@ -3,12 +3,13 @@ package com.github.itbookapp.presentation.viewmodel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.cachedIn
 import com.github.itbookapp.data.model.Books
 import com.github.itbookapp.data.model.NewBookList
 import com.github.itbookapp.data.model.RequestResult
-import com.github.itbookapp.data.model.SearchData
 import com.github.itbookapp.data.model.coroutine.IoDispatcher
 import com.github.itbookapp.data.model.pagingCount
 import com.github.itbookapp.domain.usecase.GetBooksUseCase
@@ -34,13 +35,15 @@ constructor(
 
     private lateinit var pagingSource: BooksPagingSource
 
-    val booksPager = Pager(PagingConfig(pageSize = pagingCount)) {
+    val booksPager = Pager(
+        PagingConfig(pageSize = pagingCount, enablePlaceholders = false)
+    ) {
         BooksPagingSource(
             query = query,
             dispatcher = ioDispatcher,
             searchUseCase = searchUseCase
         ).also { pagingSource = it }
-    }.flow
+    }.flow.cachedIn(viewModelScope)
 
     fun invalidatePagingSource() {
         pagingSource.invalidate()

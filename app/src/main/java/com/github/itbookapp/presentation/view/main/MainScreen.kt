@@ -1,5 +1,6 @@
-package com.github.itbookapp.presentation.view
+package com.github.itbookapp.presentation.view.main
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,25 +32,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.Lifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.github.itbookapp.data.model.Books
 import com.github.itbookapp.data.model.RequestResult
+import com.github.itbookapp.data.model.coroutine.IoScope
+import com.github.itbookapp.data.model.extraIsbn13
 import com.github.itbookapp.data.model.onSuccess
+import com.github.itbookapp.ext.SetEvents
 import com.github.itbookapp.presentation.view.common.CommonTextField
+import com.github.itbookapp.presentation.view.detail.DetailActivity
 import com.github.itbookapp.presentation.viewmodel.BookViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -58,6 +62,14 @@ fun MainScreen(
 ) {
     val newList = remember { mutableStateListOf<Books>() }
     val searchBooks = bookViewModel.booksPager.collectAsLazyPagingItems()
+
+    val context = LocalContext.current
+    val startDetails = { isbn13: String? ->
+        context.startActivity(Intent(context, DetailActivity::class.java).apply {
+            putExtra(extraIsbn13, isbn13)
+        })
+    }
+    var isRefreshing by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -91,20 +103,18 @@ fun MainScreen(
             Switch(checked = isList, onCheckedChange = { isList = it })
         }
 
-        //TODO test
-//        var isRefreshing by remember { mutableStateOf(false) }
-//        val pullRefreshState = rememberPullRefreshState(
-//            refreshing = isRefreshing,
-//            onRefresh = {
-//                isRefreshing = true
-//                bookViewModel.getNew()
-//                searchBooks.refresh()
-//            }
-//        )
+        val pullRefreshState = rememberPullRefreshState(
+            refreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+                bookViewModel.getNew()
+                searchBooks.refresh()
+            }
+        )
         Box(
             modifier = Modifier
                 .weight(1.0F)
-//                .pullRefresh(pullRefreshState)
+                .pullRefresh(pullRefreshState)
         ) {
             when (searchBooks.loadState.refresh) {
                 is LoadState.Loading, is LoadState.Error -> {
@@ -128,56 +138,58 @@ fun MainScreen(
                         ListScreen(
                             showNew = bookViewModel.query.isBlank(),
                             newList = newList,
-                            searchBooks = searchBooks
+                            searchBooks = searchBooks,
+                            onClick = startDetails
                         )
                     } else {
                         GridScreen(
                             showNew = bookViewModel.query.isBlank(),
                             newList = newList,
-                            searchBooks = searchBooks
+                            searchBooks = searchBooks,
+                            onClick = startDetails
                         )
                     }
                 }
             }
-//            PullRefreshIndicator(
-//                refreshing = isRefreshing,
-//                modifier = Modifier.align(Alignment.TopCenter),
-//                state = pullRefreshState
-//            )
+            PullRefreshIndicator(
+                refreshing = isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter),
+                state = pullRefreshState
+            )
         }
     }
 
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(key1 = Unit, block = {
-        launch {
-            bookViewModel.eventFlow.flowWithLifecycle(lifecycle).flowOn(Dispatchers.Default)
-                .collectLatest {
-                    when (it) {
-                        is BookViewModel.BookEvent.GetBooks -> {
-
-                        }
-                        is BookViewModel.BookEvent.GetNew -> {
-//                            isRefreshing = it.result == RequestResult.Loading
-                            it.result.onSuccess { response ->
-                                newList.addAll(response.books)
-                            }
-                        }
+        bookViewModel.eventFlow.collectLatest {
+            when (it) {
+                is BookViewModel.BookEvent.GetBooks -> {
+                    // do nothing here
+                }
+                is BookViewModel.BookEvent.GetNew -> {
+                    isRefreshing = it.result == RequestResult.Loading
+                    it.result.onSuccess { response ->
+                        newList.addAll(response.books)
                     }
                 }
-        }
-        launch {
-            bookViewModel.getNew()
+            }
         }
     })
 
+    lifecycleOwner.SetEvents(listener = { event ->
+        if (event == Lifecycle.Event.ON_START) {
+            bookViewModel.getNew()
+        }
+    })
 }
 
 @Composable
 private fun ListScreen(
     showNew: Boolean,
     newList: List<Books>,
-    searchBooks: LazyPagingItems<Books>
+    searchBooks: LazyPagingItems<Books>,
+    onClick: (String?) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -190,7 +202,7 @@ private fun ListScreen(
                         subtitle = item.subtitle ?: "",
                         price = item.price ?: ""
                     ) {
-                        //TODO details
+                        onClick(item.isbn13)
                     }
                 }
             } else {
@@ -202,7 +214,7 @@ private fun ListScreen(
                             subtitle = item.subtitle ?: "",
                             price = item.price ?: ""
                         ) {
-                            //TODO details
+                            onClick(item.isbn13)
                         }
                     }
                 }
@@ -215,7 +227,8 @@ private fun ListScreen(
 private fun GridScreen(
     showNew: Boolean,
     newList: List<Books>,
-    searchBooks: LazyPagingItems<Books>
+    searchBooks: LazyPagingItems<Books>,
+    onClick: (String?) -> Unit
 ) {
     LazyVerticalGrid(
         modifier = Modifier.fillMaxSize(),
@@ -229,7 +242,7 @@ private fun GridScreen(
                         subtitle = item.subtitle ?: "",
                         price = item.price ?: ""
                     ) {
-                        //TODO details
+                        onClick(item.isbn13)
                     }
                 }
             } else {
@@ -241,7 +254,7 @@ private fun GridScreen(
                             subtitle = item.subtitle ?: "",
                             price = item.price ?: ""
                         ) {
-                            //TODO details
+                            onClick(item.isbn13)
                         }
                     }
                 }

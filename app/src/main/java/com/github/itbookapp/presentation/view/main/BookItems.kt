@@ -1,4 +1,4 @@
-package com.github.itbookapp.presentation.view
+package com.github.itbookapp.presentation.view.main
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,19 +16,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.integration.compose.GlideSubcomposition
 import com.bumptech.glide.integration.compose.RequestState
-import com.bumptech.glide.integration.compose.placeholder
 import com.github.itbookapp.ext.noRippleClickable
 import com.github.itbookapp.presentation.view.annotation.CustomPreview
+import com.github.itbookapp.ui.theme.Grey
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
@@ -47,14 +45,26 @@ fun ListBookItem(
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        GlideImage(
+        GlideSubcomposition(
             model = image,
-            contentDescription = "",
-            modifier = Modifier.size(50.dp),
-            contentScale = ContentScale.Crop,
-            loading = placeholder {
-                CircularProgressIndicator()
-            })
+            modifier = Modifier.size(50.dp)
+        ) {
+            when (this.state) {
+                RequestState.Loading -> {
+                    CircularProgressIndicator()
+                }
+                RequestState.Failure -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = Grey)
+                    )
+                }
+                else -> {
+                    Image(painter = this.painter, contentDescription = null)
+                }
+            }
+        }
         Column(
             modifier = Modifier.weight(1.0F),
             verticalArrangement = Arrangement.spacedBy(3.dp)
@@ -105,13 +115,26 @@ fun GridBookItem(
             .noRippleClickable(onClick),
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        GlideImage(
+        GlideSubcomposition(
             model = image,
-            contentDescription = "",
-            modifier = Modifier.size(70.dp),
-            contentScale = ContentScale.Crop
-        )
-
+            modifier = Modifier.size(70.dp)
+        ) {
+            when (this.state) {
+                RequestState.Loading -> {
+                    CircularProgressIndicator()
+                }
+                RequestState.Failure -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = Grey)
+                    )
+                }
+                else -> {
+                    Image(painter = this.painter, contentDescription = null)
+                }
+            }
+        }
         Text(
             text = title,
             modifier = Modifier.fillMaxWidth(),
