@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -45,14 +44,12 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.github.itbookapp.data.model.Books
 import com.github.itbookapp.data.model.RequestResult
-import com.github.itbookapp.data.model.coroutine.IoScope
 import com.github.itbookapp.data.model.extraIsbn13
 import com.github.itbookapp.data.model.onSuccess
 import com.github.itbookapp.ext.SetEvents
 import com.github.itbookapp.presentation.view.common.CommonTextField
 import com.github.itbookapp.presentation.view.detail.DetailActivity
 import com.github.itbookapp.presentation.viewmodel.BookViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -87,13 +84,9 @@ fun MainScreen(
                     inputText = bookViewModel.query,
                     hint = "검색어를 입력하세요.",
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = {
-                        // search
-                        bookViewModel.invalidatePagingSource()
-                    }),
                     doAfterTextChanged = {
-                        bookViewModel.query = it
-                        if (it.isBlank()) {
+                        if (bookViewModel.query != it) {
+                            bookViewModel.query = it
                             bookViewModel.invalidatePagingSource()
                         }
                     }
